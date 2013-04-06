@@ -1,5 +1,7 @@
-;; How can this be saved as a Clojure file :S?
+;; Add extension .clj to make this save as a clojure file
 (use 'clojure.repl)
+
+;; ------------ Week 1 -------------- ;;
 
 ;; Code from chapter
 (if true 5)
@@ -30,10 +32,15 @@ true
 )
 (third myList)
 
-;; How do you do pattern matching in Clojure?
-(def myNth
-  (fn [list n] ())
+(def third-2nd-impl
+  (fn [list] (first 
+              (rest 
+               (rest list))) 
+  )
 )
+(third-2nd-impl myList)
+
+;; ------------ Week 2 -------------- ;;
 
 ;; a vector
 [1 2 3 4]
