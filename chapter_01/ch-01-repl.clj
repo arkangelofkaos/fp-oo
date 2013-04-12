@@ -62,14 +62,87 @@ true
 
 (my-apply + [1 2 3 4 5])
 
+(map inc [0 1 2 3])
+(map * [0 1 2 3] [100 200 300 400])
+
+;; Exercise 3
 (def add-squares
   (fn [& numbers]
-    ()
+    (apply + (map * numbers numbers))
   )
 )
 
-(map inc [0 1 2 3])
-(map * [0 1 2 3] [100 200 300 400])
+(add-squares 1)
+(add-squares 2)
+(add-squares 1 2)
+
+;; Exercise 3.5
+(defn add-all 
+  [seq] 
+  (apply + seq)
+)
+
+(defn squares [seq]
+  (map * seq seq)
+)
+
+(add-all `(1 2))
+(squares `(1 2 3))
+(add-all (squares `(1 2 3)))
+
+(def add-squares
+  (fn [& numbers]
+    (add-all (squares numbers))
+  )
+)
+
+(add-squares 1 2)
+
+;; Exercise 4
+(defn myFactorial [n] 
+  (apply * (range 1 (+ 1 n))) 
+)
+
+(myFactorial 1)
+(myFactorial 2)
+(myFactorial 3)
+(myFactorial 4)
+(myFactorial 5)
+
+;; Exercise 5
+(doc take)
+;; -> Use take to return first N prime numbers
+;; [assume pre-defined prime number list]
+(def myPrimeNumberList `(2 3 5 7 9 11 13 17 19 23))
+(defn firstNPrimeNumbers [n] take n myPrimeNumberList)
+(firstNPrimeNumbers 6)
+
+(doc distinct)
+;; -> Get sum of all distinct numbers
+(defn sumDistinct [& numbers] 
+  (apply + (distinct numbers))
+)
+(sumDistinct 1 2 3 3 4 1 2 3 4)
+
+(doc concat)
+(concat `(1 2) `(3 4) `(5 6))
+(defn repeater [list n] 
+  (map (fn [a] (* a n)) list)
+)
+(repeater `(1 2 3) 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
