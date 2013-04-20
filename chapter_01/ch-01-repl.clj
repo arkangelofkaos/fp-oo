@@ -126,10 +126,85 @@ true
 
 (doc concat)
 (concat `(1 2) `(3 4) `(5 6))
-(defn repeater [list n] 
-  (map (fn [a] (* a n)) list)
+
+(doc repeat)
+(repeat 2 5)
+
+(doc interleave)
+(interleave (repeat 1) (repeat 2) (repeat 3))
+;; (apply repeat (range 0 1)) 
+
+(doc drop)
+(drop 2 `(1 2 3))
+
+(doc drop-last)
+(drop-last `(1 2 3))
+
+(defn drop-first-and-last [seq]
+ (drop 1 (drop-last seq))
 )
-(repeater `(1 2 3) 1)
+(drop-first-and-last `(1 2 3 4))
+
+(doc flatten)
+(def myNestedList `((1 2 (4)) (3) (1) 1 2))
+(flatten myNestedList)
+
+(doc partition)
+(partition 2 [1 2 3 4])
+
+(doc every?)
+(defn every-element-even? [seq]
+  (every? (fn [x] (even? x)) seq)
+)
+
+(every-element-even? `(1 2))
+(every-element-even? `(6 2))
+
+(doc remove)
+(def even-numbers-in-range 
+  (fn [n] 
+    (remove odd? (range 1 (inc n)))
+  )
+)
+(even-numbers-in-range 10)
+
+;; Exercise 6
+(doc and)
+(and true true)
+(doc apply)
+
+;- How do you do symbolic and in clojure?
+(defn prefix-of? [candidate sequence]
+  (apply = true (map = candidate sequence))
+)
+(prefix-of? `(1 2) `(1 2 3))
+
+(prefix-of? `(3 4) `(1 2 3))
+
+(doc reduce)
+
+;; Exercise 7
+(defn tails [seq] 
+  (map drop
+   (range (inc (count seq)))
+   (repeat seq)
+  )
+)
+(tails `(1 2 3 4))
+(doc drop)
+(doc repeat)
+
+;; Exercise 8
+(def puzzle (fn [list] (list list)))
+; (puzzle `(1 2 3)) 
+; fails as list is identified as a variable 
+; rather than the function keyword
+
+
+
+
+
+
 
 
 
