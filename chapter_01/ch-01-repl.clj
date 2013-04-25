@@ -66,9 +66,21 @@ true
 (map * [0 1 2 3] [100 200 300 400])
 
 ;; Exercise 3
+(def sum
+  (fn [seq]
+    (apply + seq)
+  )
+)
+
+(def square
+  (fn [seq]
+    (map * seq seq)
+  )
+)
+
 (def add-squares
   (fn [& numbers]
-    (apply + (map * numbers numbers))
+    (sum (square numbers))
   )
 )
 
