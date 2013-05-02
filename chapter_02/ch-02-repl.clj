@@ -87,9 +87,11 @@
  :__methods__ {
     :class :__class_symbol__
     
-    :get-x x
+    :get-x
+    (fn [] x)
                
-    :get-y y
+    :get-y
+    (fn [] y)
 
     :shift
     (fn [this xinc yinc]
@@ -101,6 +103,59 @@
     (apply (message (:__methods__ object)) 
            object args)))
 
+(def shift
+(fn [this xinc yinc]
+       (Point (+ (x this) xinc)
+              (+ (y this) yinc))))
+
+(def myPoint (Point 10 10))
+(shift myPoint 5 1)
+
+;; ------------ Week 5 -------------- ;;
+
+(def Point {
+  :__own_symbol__ 'Point
+  :__instance_methods__
+    {
+      :add-instance-values
+        (fn [this x y]
+          (assoc this :x x :y y))
+      :shift
+        (fn [this xinc yinc]
+          (make Point 
+             (+ (:x this) xinc)
+             (+ (:y this) yinc)))
+    }
+})
+
+(def make
+  (fn [class & args]
+    (let [allocated {}
+          seeded (assoc allocated
+                        :__class_symbol__ (:__own_symbol__ class))
+          constructor (:add-instance-values
+                       (:__instance_methods__ class))]
+         (apply constructor seeded args))))
+
+(def send-to
+  (fn [instance message & args]
+    (let [class (eval (:__class_symbol__ instance)) 
+          method (message (:__instance_methods__ class))]
+      (apply method instance args))))
+
+(def apply-message-to
+(fn [class instance message args]
+       (message (:__instance_methods__ class))))
+
+(def a-point (make Point 0 0))
+
+(apply-message-to Point a-point :shift [1 3])
+
+;; ------------ Week 6 -------------- ;;
+
+(+ 1 3)
+
+;; Inheritance (and Recursion)
 
 
 
