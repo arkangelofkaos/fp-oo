@@ -4,13 +4,13 @@
 
 (assoc {:a 1} :a 2222)
 
-(merge {:a 1, :b 2, :c 3} 
-       {:a 111, :b 222, :d 4} 
+(merge {:a 1, :b 2, :c 3}
+       {:a 111, :b 222, :d 4}
        {:b "two"})
 
-(def Point 
+(def Point
   (fn [x y]
-    {:x x 
+    {:x x
      :y y}))
 
 (def x :x)
@@ -25,8 +25,6 @@
 
 ;; Exercise 1: Implement add.
 
-
-
 (def add
   (fn [this that]
     (Point (+ (x this) (x that))
@@ -39,7 +37,7 @@
 
 (def add
   (fn [this that]
-    (shift this (x that) (y that)) 
+    (shift this (x that) (y that))
   )
 )
 
@@ -49,7 +47,7 @@
 
 (def make
   (fn [f & args]
-     (apply f args)    
+     (apply f args)
   )
 )
 
@@ -58,9 +56,9 @@
 
 ;; Exercise 3
 
-(def Triangle 
+(def Triangle
   (fn [x y z]
-    {:x x 
+    {:x x
      :y y
      :z z}))
 
@@ -78,18 +76,18 @@
 ;; Exercise 4.1
 
 (def Point (fn [x y]
-{;; initializing instance variables 
+{;; initializing instance variables
  :x x
  :y y
- 
+
  ;; Metadata
  :__class_symbol__ 'Point
  :__methods__ {
     :class :__class_symbol__
-    
+
     :get-x
     (fn [] x)
-               
+
     :get-y
     (fn [] y)
 
@@ -100,7 +98,7 @@
 
 (def send-to
   (fn [object message & args]
-    (apply (message (:__methods__ object)) 
+    (apply (message (:__methods__ object))
            object args)))
 
 (def shift
@@ -113,63 +111,149 @@
 
 ;; ------------ Week 5 -------------- ;;
 
-(def Point {
+;; Reading only
+
+;; ------------ Week 6 -------------- ;;
+
+(def Point
+{
   :__own_symbol__ 'Point
   :__instance_methods__
-    {
-      :add-instance-values
-        (fn [this x y]
-          (assoc this :x x :y y))
-      :shift
-        (fn [this xinc yinc]
-          (make Point 
-             (+ (:x this) xinc)
-             (+ (:y this) yinc)))
-    }
-})
+  {
+    :add-instance-values (fn [this x y]
+                           (assoc this :x x :y y))
+    :class :__class_symbol__
+    :shift (fn [this xinc yinc]
+             (make Point (+ (:x this) xinc)
+                         (+ (:y this) yinc)))
+    :add (fn [this other]
+           (send-to this :shift (:x other)
+                                (:y other)))
+   }
+ })
 
-(def make
-  (fn [class & args]
-    (let [allocated {}
-          seeded (assoc allocated
-                        :__class_symbol__ (:__own_symbol__ class))
-          constructor (:add-instance-values
-                       (:__instance_methods__ class))]
-         (apply constructor seeded args))))
+;; Exercise 1
 
-(def send-to
-  (fn [instance message & args]
-    (let [class (eval (:__class_symbol__ instance)) 
-          method (message (:__instance_methods__ class))]
-      (apply method instance args))))
+(defn get-method-from [message class]
+  (message (:__instance_methods__ class))
+)
 
-(def apply-message-to
-(fn [class instance message args]
-       (message (:__instance_methods__ class))))
+(defn apply-message-to [class instance message args]
+  (let [method (get-method-from message class)]
+    (apply method instance args)
+  )
+)
+
+(defn create-seeded-instance [class & args]
+  {:__class_symbol__ (:__own_symbol__ class)}
+)
+
+(defn make [class & args]
+  (let [seeded-instance (create-seeded-instance class args)]
+    (apply-message-to class seeded-instance :add-instance-values args)
+  )
+)
+
+(defn get-class-from [instance]
+  (eval (:__class_symbol__ instance))
+)
+
+(defn send-to [instance message & args]
+  (let [class (get-class-from instance)]
+    (apply-message-to class instance message args))
+)
 
 (def a-point (make Point 0 0))
 
 (apply-message-to Point a-point :shift [1 3])
 
-;; ------------ Week 6 -------------- ;;
+;; Exercise 2
 
-(+ 1 3)
+(def Point
+{
+  :__own_symbol__ 'Point
+  :__instance_methods__
+  {
+    :add-instance-values (fn [this x y]
+                           (assoc this :x x :y y))
+    :class-name :__class_symbol__
+    :class (fn [this]
+             (get-class-from this))
+    :shift (fn [this xinc yinc]
+             (make Point (+ (:x this) xinc)
+                         (+ (:y this) yinc)))
+    :add (fn [this other]
+           (send-to this :shift (:x other)
+                                (:y other)))
+   }
+ })
+
+(def point (make Point 1 2))
+(send-to point :class-name)
+(send-to point :class)
+
+;; Exercise 3
+
+(def point (make Point 1 2))
+
+(def Point
+{
+  :__own_symbol__ 'Point
+  :__instance_methods__
+  {
+    :origin (fn [this] (make Point 0 0))
+    :add-instance-values (fn [this x y]
+                           (assoc this :x x :y y))
+    :class-name :__class_symbol__
+    :class (fn [this]
+             (get-class-from this))
+    :shift (fn [this xinc yinc]
+             (make Point (+ (:x this) xinc)
+                         (+ (:y this) yinc)))
+    :add (fn [this other]
+           (send-to this :shift (:x other)
+                                (:y other)))
+   }
+ })
+
+(send-to point :origin)
+
+;; This works because we dynamically eval the class of point
+;; to the newly defined Point class.
+
+;; Exercise 4
+
+(def Holder
+{
+  :__own_symbol__ 'Holder
+  :__instance_methods__
+  {
+    :add-instance-values (fn [this held]
+                           (assoc this :held held))
+  }
+})
+
+(:not-there {:a 1, :b 2})
+(and true nil)
+(and true false)
+(or nil 3)
+
+(defn apply-message-to [class instance message args]
+  (let [method (or (get-method-from message class)
+                message)]
+    (apply method instance args)
+  )
+)
+
+(send-to (make Holder "stuff") :held)
+
+;; Exercise 5
+
+(send-to (make Point 1 2) :some-unknown-message)
+
+;; ------------ Week 7 -------------- ;;
 
 ;; Inheritance (and Recursion)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
