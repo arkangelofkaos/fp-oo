@@ -255,6 +255,79 @@
 
 ;; Inheritance (and Recursion)
 
+;; learning to use assert for pre-conditions
+
+;; defining a superclass "Anything"
+(def Anything {
+  :__own_symbol__ 'Anything
+  :__instance_methods__
+  {
+    ;; default constructor
+    :add-instance-values identity
+    ;; these two methods have been pulled up from Point.
+    :class-name :__class_symbol__
+    :class (fn [this] (get-class-from this)) }
+})
+
+;; defining a way to do overriding/inheritance
+;; (def maps (map class-instance-methods (lineage 'Point)))
+;; (def merged (apply merge maps))
+
+;; QUOTE ;;
+;; I picked the rather odd name method-cache to
+;; give me an excuse to point out that this
+;; implementation isn’t completely silly.
+
+;; Recursion
+;; -- why is the book patronising about this :S ?!?!
+
+;; -- patter of recursion in Clojure with if:
+(defn recursive-example [num]
+  (if (<= num 1)
+    1
+    (+ num (recursive-example (dec num)))
+  )
+)
+
+(recursive-example 1)
+(recursive-example 10)
+
+(doc cons)
+
+(defn recursive-bottom-up-helper
+  [number step firstNum secondNum list-so-far]
+  (if (<= number step)
+    list-so-far
+    (recursive-bottom-up-helper number
+                                (inc step)
+                                secondNum
+                                (+ firstNum secondNum)
+                                (concat list-so-far (list(+ firstNum secondNum))))
+  )
+)
+
+(defn fibonaci [number]
+  (if (<= number 2)
+    (list 1 1)
+    (recursive-bottom-up-helper number 2 1 1 (list 1 1))
+  )
+)
+
+(fibonaci 10)
+
+;; optimising tail recursion - use recur() method?
+
+(defn factorial [n]
+  (if (or (== 0 n) (== 1 n))
+    1
+    (* n (factorial (dec n)))
+  )
+)
+
+(factorial 4)
+
+
+
 
 
 
