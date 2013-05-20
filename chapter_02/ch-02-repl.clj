@@ -317,6 +317,8 @@
 
 ;; optimising tail recursion - use recur() method?
 
+;; Exercise 1
+
 (defn factorial [n]
   (if (or (== 0 n) (== 1 n))
     1
@@ -324,9 +326,80 @@
   )
 )
 
+
 (factorial 4)
 
+;; Exercise 2
 
+(def recursive-function
+  (fn [something so-far]
+    (if (= 0 something)
+      so-far
+      (recursive-function (dec something)
+                             (* something so-far)))))
+
+(defn factorial [n]
+  (recursive-function n 1)
+)
+
+(factorial 4)
+
+;; Exercise 3
+
+(defn recursive-function [list so-far]
+  (if (empty? list)
+    so-far
+    (recursive-function (rest list)
+                        (+ (first list) so-far))
+  )
+)
+
+(recursive-function [1 2 3 4] 0)
+
+;; Exercise 4
+
+(defn recursive-function [list so-far]
+  (if (empty? list)
+    so-far
+    (recursive-function (rest list)
+                        (* (first list) so-far))
+  )
+)
+
+(recursive-function [1 2 3 4] 1)
+
+(defn recursive-function [function list so-far]
+  (if (empty? list)
+    so-far
+    (recursive-function function
+                            (rest list)
+                            (function (first list) so-far))
+  )
+)
+
+(recursive-function + [1 2 3 4] 0)
+(recursive-function * [1 2 3 4] 1)
+
+;; Exercise 5
+
+
+(defn add-to-map [key-word map-so-far]
+  (assoc map-so-far key-word 0)
+)
+
+(recursive-function add-to-map
+                    [:a :b :c]
+                    {}
+)
+
+(defn add-to-map-with-position [key-word map-so-far]
+  (assoc map-so-far key-word (count map-so-far))
+)
+
+(recursive-function add-to-map-with-position
+                    [:a :b :c]
+                    {}
+)
 
 
 
