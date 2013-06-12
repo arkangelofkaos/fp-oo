@@ -92,3 +92,138 @@ complete)))
     (+ 2)
     (* 3)
     (+ 4))
+
+(def separate
+(fn [predicate sequence]
+[(filter predicate sequence) (remove predicate sequence)]))
+
+;;(separate :already-in? courses)
+
+(def visible-courses
+  (fn [courses]
+    (let
+      [
+       [guaranteed possibles]
+       (separate :already-in? courses)
+      ]
+      (concat guaranteed
+              (remove :unavailable? possibles)))))
+
+(def final-shape
+  (fn [courses]
+    (let
+      [desired-keys
+       [:course-name :morning? :registered :spaces-left :already-in?]
+      ]
+      (map
+       (fn [course]
+         (select-keys course desired-keys)
+       )
+       courses
+      )
+    )
+  )
+)
+
+(def half-day-solution
+  (fn [courses registrants-courses instructor-count]
+    (-> courses
+        (annotate registrants-courses instructor-count) visible-courses
+        ((fn [courses] (sort-by :course-name courses))) final-shape
+    )
+  )
+)
+
+(def solution
+  (fn [courses registrants-courses instructor-count]
+    (map (fn [courses]
+           (half-day-solution courses registrants-courses
+                                         instructor-count)
+         )
+         (separate :morning? courses)
+     )
+  )
+)
+
+;;; Exercise 1
+
+{:manager? true
+ :taking-now ["zig" "zag"]}
+
+(def note-unavailability
+     (fn [courses instructor-count manager?]
+       (let [out-of-instructors?
+             (= instructor-count
+                (count (filter (fn [course] (not (:empty? course)))
+                               courses)))]
+         (map (fn [course]
+                (assoc course
+                       :unavailable? (or (:full? course)
+                                         (and out-of-instructors?
+                                              (:empty? course))
+                                         (and manager?                     ;; <<===
+                                              (not (:morning? course))))))
+              courses))))
+
+(def annotate
+     (fn [courses registrant instructor-count]
+       (-> courses
+           (answer-annotations (:taking-now registrant))
+           domain-annotations
+           (note-unavailability instructor-count (:manager? registrant)))))
+
+(def half-day-solution
+     (fn [courses registrant instructor-count]
+       (-> courses
+           (annotate registrant instructor-count)
+           visible-courses
+           ((fn [courses] (sort-by :course-name courses)))
+           final-shape)))
+
+(def solution
+     (fn [courses registrant instructor-count]
+       (map (fn [courses]
+              (half-day-solution courses registrant instructor-count))
+            (separate :morning? courses))))
+
+
+
+;;; Exercise 2
+
+{:manager? true
+ :taking-now ["zig" "zag"]
+ :previously-taken ["updating"]}
+
+{:morning? true
+ ; ...
+ :prerequisites ["zigging"]}
+
+(def note-unavailability
+     (fn [courses instructor-count registrant]
+       (let [out-of-instructors?
+             (= instructor-count
+                (count (filter (fn [course] (not (:empty? course)))
+                               courses)))]
+         (map (fn [course]
+                (assoc course
+                       :unavailable? (or (:full? course)
+                                         (and out-of-instructors?
+                                              (:empty? course))
+                                         (and (:manager? registrant)
+                                              (not (:morning? course)))
+                                         (not (superset? (set (:previously-taken registrant))
+                                                         (set (:prerequisites course)))))))
+              courses))))
+
+(def annotate
+     (fn [courses registrant instructor-count]
+       (-> courses
+           (answer-annotations (:taking-now registrant))
+           domain-annotations
+           (note-unavailability instructor-count registrant))))
+
+
+
+
+
+
