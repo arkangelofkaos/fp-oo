@@ -2,62 +2,6 @@
 
 ;; ------------ Week 8 -------------- ;;
 
-(use 'clojure.set)
-(union #{1 2} #{2 3})
-(intersection #{1 2} #{2 3})
-(difference #{1 2} #{2 3})
-
-(def answer-annotations
-(fn [courses registrants-courses]
-(let [checking-set (set registrants-courses)] (map (fn [course]
-                (assoc course
-                       :spaces-left (- (:limit course)
-                                       (:registered course))
-                       :already-in? (contains? checking-set
-                                               (:course-name course))))
-courses))))
-
-(answer-annotations [{:course-name "zigging" :limit 4,
-                             :registered 3}
-                            {:course-name "zagging" :limit 1,
-                             :registered 1}]
-                           ["zagging"])
-
-(def domain-annotations (fn [courses]
-(map (fn [course] (assoc course
-                :empty? (zero? (:registered course))
-                :full? (zero? (:spaces-left course))))
-            courses)))
-
-(domain-annotations [{:registered 1, :spaces-left 1},
-                            {:registered 0, :spaces-left 1},
-                            {:registered 1, :spaces-left 0}])
-
-(def note-unavailability
-(fn [courses instructor-count]
-(let [out-of-instructors? (= instructor-count
-(count (filter (fn [course] (not (:empty? course))) courses)))]
-(map (fn [course] (assoc course
-                       :unavailable? (or (:full? course)
-                                         (and out-of-instructors?
-                                              (:empty? course)))))
-courses))))
-
-(def annotate
-(fn [courses registrants-courses instructor-count]
-       (note-unavailability (domain-annotations
-                             (answer-annotations courses
-                                                 registrants-courses))
-                            instructor-count)))
-
-(def annotate
-(fn [courses registrants-courses instructor-count]
-(let [answers (answer-annotations courses registrants-courses)
-             domain (domain-annotations answers)
-             complete (note-unavailability domain
-                                           instructor-count)]
-complete)))
-
 ;; -- Exercise 1 ---
 (defn devector [vector]
   (-> vector
@@ -221,6 +165,154 @@ complete)))
            (answer-annotations (:taking-now registrant))
            domain-annotations
            (note-unavailability instructor-count registrant))))
+
+
+(def inc5 (fn [x] (+ 5 x)))
+(inc5 3)
+
+(def make-incrementer
+  (fn [increment]
+    (fn [x] (+ increment x))))
+
+(def inc5 (make-incrementer 5))
+(inc5 3)
+
+(def add3 (partial + 3))
+(add3 8)
+
+
+;; --- Exercise 1 ---
+(def map-plus-2 (partial map (partial + 2)))
+
+;; --- Exercise 2 ---
+
+(doc juxt)
+( (juxt empty? reverse count)
+  [:a :b :c])
+
+(def separate
+(fn [pred sequence]
+       [(filter pred sequence) (remove pred sequence)]))
+
+(separate even? `(1 2 2 3 4))
+
+(defn my-seperate [pred sequence]
+  (let [predFilter (partial filter pred)
+        complementPredFilter (partial filter (complement pred))]
+   (juxt predFilter complementPredFilter)
+         sequence)
+)
+
+(my-seperate even? `(1 2 2 3 4))
+
+;; -- Exercise 3/4 ---
+
+(def myfun
+  (let [x 3]
+    (fn [] x)))
+
+(myfun)
+
+(defn my-fun-helper [x]
+  (fn [] x))
+
+;; todo...
+
+;; --- Exercise 5 ---
+
+(def my-atom (atom 0))
+
+(swap! my-atom inc)
+
+(deref my-atom)
+
+(doc swap!)
+
+(swap! my-atom (defn myfunc [x] 33))
+(deref my-atom)
+
+;; --- Exercise 6 ---
+
+(defn always [x]
+  (defn _always [& args] x))
+
+((always 8) 1 'a :foo)
+
+(doc constantly)
+
+;; --- Other exercises todo.... ----
+
+(-> (+ 1 2) (* 3) (+ 4))
+
+;; --- Week 11???? ---
+
+;; Exercise 1
+
+(let [a (concat '(a b c) '(d e f))
+      b (count a)]
+  (odd? b))
+
+(-> `(a b c)
+    (concat `(d e f))
+    count
+    odd?
+)
+
+(-> `(a b c)
+    ((fn [step-1-value]
+       (-> (concat step-1-value `(d e f))
+           ((fn [step-2-value]
+              (-> (count step-2-value)
+                  ((fn [step-3-value]
+                     (odd? step-3-value)
+                  ))
+              )
+           ))
+       )
+    ))
+ )
+
+
+;; Exercise 2
+(odd? (count (concat '(a b c) '(d e f))))
+
+(-> `(a b c)
+    (concat `(d e f))
+    count
+    odd?
+)
+
+(-> `(a b c)
+    ((fn [step-1-value]
+       (-> (concat step-1-value `(d e f))
+           ((fn [step-2-value]
+              (-> (count step-2-value)
+                  ((fn [step-3-value]
+                     (odd? step-3-value)
+                  ))
+              )
+           ))
+       )
+    ))
+)
+
+;; Exercise 3
+
+(-> 3
+    (+ 2)
+    inc)
+
+(-> 3
+    ((fn [step-1-value]
+       (-> (+ 2 step-1-value)
+           ((fn [step-2-value]
+              (inc step-2-value)
+           ))
+       )
+    ))
+)
+
+
 
 
 
